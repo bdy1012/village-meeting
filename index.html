@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>마을 이야기 담기 - 메인</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  :root{
+    --bg: #faf6ee;
+    --card: #ffffff;
+    --card-line: #e6ddc9;
+    --amber: #c9822c;
+    --amber-soft: #f3e3c8;
+    --text: #2c2620;
+    --muted: #8a8071;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Pretendard', -apple-system, sans-serif;
+    background: radial-gradient(ellipse at top, #fffdf8 0%, var(--bg) 60%);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+  }
+
+  .wrap{max-width:420px;width:100%;text-align:center;}
+
+  .eyebrow{
+    font-size:12px;letter-spacing:.22em;color:var(--amber);
+    font-weight:800;margin-bottom:10px;
+  }
+  h1{font-size:28px;margin:0 0 6px;font-weight:800;letter-spacing:-0.01em;}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:36px;}
+
+  .menu{display:flex;flex-direction:column;gap:14px;}
+
+  .menu-item{
+    display:flex;align-items:center;gap:16px;
+    background:var(--card);
+    border:1.5px solid var(--card-line);
+    border-radius:20px;
+    padding:20px 22px;
+    text-decoration:none;
+    color:var(--text);
+    text-align:left;
+    transition:border-color .15s ease, transform .1s ease, box-shadow .15s ease;
+    box-shadow:0 1px 3px rgba(60,50,30,0.05);
+  }
+  .menu-item:hover{
+    border-color:var(--amber);
+    box-shadow:0 8px 20px -8px rgba(201,130,44,0.35);
+  }
+  .menu-item:active{transform:scale(0.98);}
+
+  .menu-icon{
+    width:46px;height:46px;flex-shrink:0;
+    border-radius:14px;
+    background:var(--amber-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-size:21px;
+  }
+
+  .menu-text .menu-title{font-size:16.5px;font-weight:800;margin-bottom:2px;}
+  .menu-text .menu-desc{font-size:12.5px;color:var(--muted);}
+
+  .menu-arrow{margin-left:auto;color:var(--muted);font-size:18px;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">TABLE FACILITATOR</div>
+    <h1>마을 이야기 담기</h1>
+    <div class="sub">아래에서 필요한 페이지를 선택하세요.</div>
+
+    <div class="menu">
+      <a class="menu-item" href="input-form.html">
+        <div class="menu-icon">✏️</div>
+        <div class="menu-text">
+          <div class="menu-title">작성하기</div>
+          <div class="menu-desc">테이블에서 나온 의견 입력</div>
+        </div>
+        <div class="menu-arrow">›</div>
+      </a>
+
+      <a class="menu-item" href="wall.html">
+        <div class="menu-icon">🧱</div>
+        <div class="menu-text">
+          <div class="menu-title">담벼락</div>
+          <div class="menu-desc">실시간으로 들어오는 이야기 보기</div>
+        </div>
+        <div class="menu-arrow">›</div>
+      </a>
+
+      <a class="menu-item" href="report.html">
+        <div class="menu-icon">📊</div>
+        <div class="menu-text">
+          <div class="menu-title">리포트</div>
+          <div class="menu-desc">워드클라우드 최종 보고서</div>
+        </div>
+        <div class="menu-arrow">›</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
