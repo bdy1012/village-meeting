@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>마을 이야기 담기</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  :root{
+    --bg: #faf6ee;
+    --card: #ffffff;
+    --card-line: #e6ddc9;
+    --amber: #c9822c;
+    --amber-soft: #f3e3c8;
+    --text: #2c2620;
+    --muted: #8a8071;
+    --danger: #c1462f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Pretendard', -apple-system, sans-serif;
+    background:
+      radial-gradient(ellipse at top, #fffdf8 0%, var(--bg) 60%);
+    color:var(--text);
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:480px;margin:0 auto;}
+
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.18em;
+    color:var(--amber);
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  h1{
+    font-size:24px;
+    margin:0 0 4px;
+    font-weight:800;
+    letter-spacing:-0.01em;
+  }
+  .sub{color:var(--muted);font-size:13px;margin-bottom:24px;}
+
+  .row{display:flex;gap:10px;margin-bottom:22px;}
+  .badge{
+    flex:1;
+    background:var(--card);
+    border:1px solid var(--card-line);
+    border-radius:14px;
+    padding:12px 14px;
+    box-shadow:0 1px 2px rgba(60,50,30,0.04);
+  }
+  .badge label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;}
+  .badge input, .badge select{
+    width:100%;
+    background:transparent;
+    border:none;
+    color:var(--text);
+    font-size:16px;
+    font-weight:700;
+    outline:none;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+
+  section{margin-bottom:26px;}
+  .step-label{
+    display:flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;
+  }
+  .step-num{
+    width:20px;height:20px;border-radius:50%;
+    background:var(--amber);color:#fffaf0;
+    font-size:11px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .pill-grid{display:flex;flex-direction:column;gap:10px;}
+  .pill{
+    text-align:left;
+    background:var(--card);
+    border:1.5px solid var(--card-line);
+    color:var(--text);
+    border-radius:999px;
+    padding:14px 18px;
+    font-size:14.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:border-color .15s ease, box-shadow .15s ease, transform .1s ease;
+  }
+  .pill:active{transform:scale(0.99);}
+  .pill.selected{
+    border-color:var(--amber);
+    background:var(--amber-soft);
+    box-shadow:0 0 0 1px var(--amber);
+  }
+
+  .title-input{
+    width:100%;
+    background:var(--card);
+    border:1.5px solid var(--card-line);
+    border-radius:14px;
+    color:var(--text);
+    font-family:inherit;
+    font-size:15px;
+    font-weight:600;
+    padding:14px 16px;
+    outline:none;
+    margin-bottom:12px;
+  }
+  .title-input:focus{border-color:var(--amber);}
+  .title-input::placeholder{color:var(--muted);font-weight:500;}
+
+  textarea{
+    width:100%;min-height:120px;
+    background:var(--card);
+    border:1.5px solid var(--card-line);
+    border-radius:16px;
+    color:var(--text);
+    font-family:inherit;
+    font-size:15px;
+    padding:16px;
+    resize:vertical;
+    outline:none;
+  }
+  textarea:focus{border-color:var(--amber);}
+  textarea::placeholder{color:var(--muted);}
+
+  .submit{
+    width:100%;
+    background:var(--amber);
+    color:#fffaf0;
+    border:none;
+    border-radius:16px;
+    padding:17px;
+    font-size:16px;
+    font-weight:800;
+    cursor:pointer;
+    letter-spacing:-0.01em;
+    box-shadow:0 6px 16px -6px rgba(201,130,44,0.5);
+  }
+  .submit:disabled{opacity:.5;box-shadow:none;}
+
+  .toast{
+    position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
+    background:var(--amber);color:#fffaf0;
+    padding:12px 22px;border-radius:999px;font-weight:700;font-size:14px;
+    opacity:0;transition:opacity .25s ease, transform .25s ease;
+    pointer-events:none;
+    box-shadow:0 8px 20px -6px rgba(0,0,0,0.25);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast.error{background:var(--danger);}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">TABLE FACILITATOR</div>
+    <h1>마을 이야기 담기</h1>
+    <div class="sub">테이블에서 나온 이야기를 그대로 옮겨주세요.</div>
+
+    <div class="row">
+      <div class="badge">
+        <label>테이블 번호</label>
+        <input id="tableNum" type="number" inputmode="numeric" placeholder="예: 3">
+      </div>
+      <div class="badge">
+        <label>진행 주제</label>
+        <select id="topicSelect">
+          <option value="주제1">주제 1</option>
+          <option value="주제2">주제 2</option>
+        </select>
+      </div>
+    </div>
+
+    <section>
+      <div class="step-label"><span class="step-num">1</span>카테고리 선택</div>
+      <div class="pill-grid" id="pillGrid">
+        <button class="pill" data-cat="추억하는 마을 (역사, 전시, 기록)">추억하는 마을 (역사, 전시, 기록)</button>
+        <button class="pill" data-cat="신나는 마을 (공연, 낭송회)">신나는 마을 (공연, 낭송회)</button>
+        <button class="pill" data-cat="즐기는 마을 (놀이, 체험)">즐기는 마을 (놀이, 체험)</button>
+        <button class="pill" data-cat="맛있는 마을 (먹거리, 특산물)">맛있는 마을 (먹거리, 특산물)</button>
+        <button class="pill" data-cat="쉼이있는 마을 (마을해설, 원도심투어)">쉼이있는 마을 (마을해설, 원도심투어)</button>
+        <button class="pill" data-cat="나눔하는 마을 (벼룩시장, 아나바다)">나눔하는 마을 (벼룩시장, 아나바다)</button>
+        <button class="pill" data-cat="기타">기타</button>
+      </div>
+    </section>
+
+    <section>
+      <div class="step-label"><span class="step-num">2</span>주제</div>
+      <input class="title-input" id="titleInput" type="text" placeholder="한 줄로 요약한 제목을 적어주세요">
+    </section>
+
+    <section>
+      <div class="step-label"><span class="step-num">3</span>내용 입력</div>
+      <textarea id="content" placeholder="테이블에서 나온 의견을 자유롭게 적어주세요."></textarea>
+    </section>
+
+    <button class="submit" id="submitBtn">이 의견 전달하기</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  // ⚠️ 배포한 Apps Script 웹앱 URL을 여기에 붙여넣으세요
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx13xoebmkwHY2tw60618-zHTnVgmsJswGwOq9XqgkS2EXXc1I8yDCwU4xdZcZNbuIknA/exec";
+
+  let selectedCategory = null;
+
+  document.querySelectorAll('.pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedCategory = btn.dataset.cat;
+    });
+  });
+
+  const toast = document.getElementById('toast');
+  function showToast(msg, isError){
+    toast.textContent = msg;
+    toast.classList.toggle('error', !!isError);
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  document.getElementById('submitBtn').addEventListener('click', async () => {
+    const table = document.getElementById('tableNum').value.trim();
+    const topic = document.getElementById('topicSelect').value;
+    const title = document.getElementById('titleInput').value.trim();
+    const content = document.getElementById('content').value.trim();
+
+    if(!table){ showToast('테이블 번호를 입력해주세요', true); return; }
+    if(!selectedCategory){ showToast('카테고리를 선택해주세요', true); return; }
+    if(!title){ showToast('주제(제목)를 입력해주세요', true); return; }
+    if(!content){ showToast('내용을 입력해주세요', true); return; }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '전달 중...';
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ table, topic, category: selectedCategory, title, content })
+      });
+
+      showToast('전달됐어요. 감사합니다!');
+      document.getElementById('titleInput').value = '';
+      document.getElementById('content').value = '';
+      document.querySelectorAll('.pill').forEach(b => b.classList.remove('selected'));
+      selectedCategory = null;
+
+    } catch(err) {
+      showToast('전송 중 문제가 발생했어요', true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '이 의견 전달하기';
+    }
+  });
+</script>
+</body>
+</html>

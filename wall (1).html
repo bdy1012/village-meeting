@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>마을 이야기 담벼락</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  :root{
+    --bg: #faf6ee;
+    --card: #ffffff;
+    --card-line: #e6ddc9;
+    --amber: #c9822c;
+    --amber-soft: #f3e3c8;
+    --text: #2c2620;
+    --muted: #8a8071;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Pretendard', -apple-system, sans-serif;
+    background: radial-gradient(ellipse at top, #fffdf8 0%, var(--bg) 60%);
+    color:var(--text);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  header{
+    position:sticky;top:0;z-index:5;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 34px;
+    background:linear-gradient(180deg, rgba(250,246,238,0.97), rgba(250,246,238,0.85) 70%, transparent);
+    backdrop-filter:blur(6px);
+  }
+  .title-block .eyebrow{font-size:12px;letter-spacing:.2em;color:var(--amber);font-weight:800;}
+  .title-block h1{margin:2px 0 0;font-size:26px;font-weight:800;}
+
+  .topic-toggle{display:flex;background:var(--card);border:1px solid var(--card-line);border-radius:999px;padding:5px;}
+  .topic-toggle button{
+    padding:10px 22px;border:none;background:transparent;color:var(--muted);
+    font-weight:700;font-size:15px;border-radius:999px;cursor:pointer;transition:.15s;
+  }
+  .topic-toggle button.active{background:var(--amber);color:#fffaf0;}
+
+  .count{color:var(--muted);font-size:13px;margin-left:14px;}
+
+  main{padding:8px 34px 60px;}
+  .grid{
+    columns: 4 260px;
+    column-gap:16px;
+  }
+  @media (max-width:900px){ .grid{columns:2 220px;} }
+  @media (max-width:520px){ .grid{columns:1;} }
+
+  .card{
+    break-inside:avoid;
+    background:var(--card);
+    border:1px solid var(--card-line);
+    border-radius:16px;
+    padding:16px 18px;
+    margin-bottom:14px;
+    animation:fadeIn .35s ease both;
+    box-shadow:0 1px 3px rgba(60,50,30,0.05);
+  }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .cat-tag{
+    display:inline-block;
+    font-size:11px;font-weight:700;
+    padding:4px 10px;border-radius:999px;
+    margin-bottom:10px;
+    border:1px solid currentColor;
+  }
+  .card .card-title{font-size:15.5px;font-weight:800;margin-bottom:4px;}
+  .card .content{font-size:14.5px;line-height:1.55;color:var(--text);}
+  .card .meta{margin-top:10px;font-size:11px;color:var(--muted);}
+
+  .empty{color:var(--muted);text-align:center;padding:80px 0;font-size:15px;}
+
+  /* 신규 항목 팝업 */
+  .popup-layer{
+    position:fixed;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    pointer-events:none;z-index:50;
+  }
+  .popup-card{
+    max-width:560px;width:88%;
+    background:#ffffff;
+    border:2px solid var(--amber);
+    border-radius:22px;
+    padding:30px 34px;
+    box-shadow:0 0 0 1px rgba(201,130,44,0.15), 0 30px 80px -20px rgba(60,50,30,0.35), 0 0 60px -10px rgba(201,130,44,0.25);
+    opacity:0;
+    transform:scale(0.85) translateY(12px);
+    transition:opacity .28s ease, transform .28s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .popup-card.show{opacity:1;transform:scale(1) translateY(0);}
+  .popup-eyebrow{font-size:12px;letter-spacing:.16em;color:var(--amber);font-weight:800;margin-bottom:10px;}
+  .popup-cat{display:inline-block;font-size:13px;font-weight:700;color:var(--amber);margin-bottom:12px;}
+  .popup-title{font-size:20px;font-weight:800;margin-bottom:8px;}
+  .popup-content{font-size:18px;font-weight:500;line-height:1.5;color:var(--text);}
+  .popup-meta{margin-top:16px;font-size:13px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <div class="eyebrow">LIVE WALL</div>
+    <h1 id="pageTitle">마을 이야기 담벼락<span class="count" id="countLabel"></span></h1>
+  </div>
+  <div class="topic-toggle">
+    <button data-topic="주제1" class="active">주제 1</button>
+    <button data-topic="주제2">주제 2</button>
+  </div>
+</header>
+
+<main>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="emptyMsg" style="display:none;">아직 들어온 이야기가 없어요. 첫 이야기를 기다리는 중입니다.</div>
+</main>
+
+<div class="popup-layer" id="popupLayer"></div>
+
+<script>
+  // ⚠️ 배포한 Apps Script 웹앱 URL을 여기에 붙여넣으세요 (input-form.html과 동일한 URL)
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx13xoebmkwHY2tw60618-zHTnVgmsJswGwOq9XqgkS2EXXc1I8yDCwU4xdZcZNbuIknA/exec";
+  const POLL_INTERVAL_MS = 4000;
+
+  const CATEGORY_COLORS = {
+    '추억하는 마을 (역사, 전시, 기록)': '#a563b0',
+    '신나는 마을 (공연, 낭송회)': '#3f7fb0',
+    '즐기는 마을 (놀이, 체험)': '#3f9c6d',
+    '맛있는 마을 (먹거리, 특산물)': '#c06a35',
+    '쉼이있는 마을 (마을해설, 원도심투어)': '#c9822c',
+    '나눔하는 마을 (벼룩시장, 아나바다)': '#c1507a',
+    '기타': '#8a8071'
+  };
+
+  let currentTopic = '주제1';
+  let knownIds = new Set();
+  let firstLoad = true;
+  const popupQueue = [];
+  let popupBusy = false;
+
+  const grid = document.getElementById('grid');
+  const emptyMsg = document.getElementById('emptyMsg');
+  const countLabel = document.getElementById('countLabel');
+  const popupLayer = document.getElementById('popupLayer');
+
+  document.querySelectorAll('.topic-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.topic-toggle button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTopic = btn.dataset.topic;
+      knownIds = new Set();
+      firstLoad = true;
+      grid.innerHTML = '';
+      fetchData();
+    });
+  });
+
+  function renderCard(item){
+    const color = CATEGORY_COLORS[item.category] || CATEGORY_COLORS['기타'];
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML = `
+      <span class="cat-tag" style="color:${color}">${escapeHtml(item.category)}</span>
+      <div class="card-title">${escapeHtml(item.title || '')}</div>
+      <div class="content">${escapeHtml(item.content)}</div>
+      <div class="meta">테이블 ${escapeHtml(String(item.table))}</div>
+    `;
+    grid.prepend(el);
+  }
+
+  function queuePopup(item){
+    popupQueue.push(item);
+    if(!popupBusy) showNextPopup();
+  }
+
+  function showNextPopup(){
+    if(popupQueue.length === 0){ popupBusy = false; return; }
+    popupBusy = true;
+    const item = popupQueue.shift();
+    const color = CATEGORY_COLORS[item.category] || CATEGORY_COLORS['기타'];
+
+    const card = document.createElement('div');
+    card.className = 'popup-card';
+    card.innerHTML = `
+      <div class="popup-eyebrow">NEW STORY</div>
+      <div class="popup-cat" style="color:${color}">${escapeHtml(item.category)}</div>
+      <div class="popup-title">${escapeHtml(item.title || '')}</div>
+      <div class="popup-content">${escapeHtml(item.content)}</div>
+      <div class="popup-meta">테이블 ${escapeHtml(String(item.table))}</div>
+    `;
+    popupLayer.innerHTML = '';
+    popupLayer.appendChild(card);
+    requestAnimationFrame(() => card.classList.add('show'));
+
+    setTimeout(() => {
+      card.classList.remove('show');
+      setTimeout(() => {
+        popupLayer.innerHTML = '';
+        showNextPopup();
+      }, 300);
+    }, 3000);
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function fetchData(){
+    try {
+      const res = await fetch(`${SCRIPT_URL}?topic=${encodeURIComponent(currentTopic)}`);
+      const data = await res.json();
+      if(data.result !== 'success') return;
+
+      const items = data.items || [];
+      countLabel.textContent = items.length ? ` · ${items.length}개` : '';
+      emptyMsg.style.display = items.length ? 'none' : 'block';
+
+      // 오래된 순서대로 정렬 후, 신규 항목만 순서대로 처리
+      items.sort((a,b) => a.id - b.id);
+
+      items.forEach(item => {
+        if(!knownIds.has(item.id)){
+          knownIds.add(item.id);
+          renderCard(item);
+          if(!firstLoad){
+            queuePopup(item);
+          }
+        }
+      });
+
+      firstLoad = false;
+
+    } catch(err){
+      console.error('데이터를 불러오지 못했습니다', err);
+    }
+  }
+
+  fetchData();
+  setInterval(fetchData, POLL_INTERVAL_MS);
+</script>
+</body>
+</html>
